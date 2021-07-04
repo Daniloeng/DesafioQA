@@ -6,11 +6,11 @@ Desafio QA Maxxidata
 
 ### Cadastrar Pessoa
 Permite realizar o cadastro de uma nova pessoa. Os campos disponíveis para cadastro são:
-nome: Uma string, obrigatória, de até 255 caracteres que armazena o nome da pessoa;
-dataNascimento: Um Date, obrigatório, que armazena a data de nascimento da pessoa. A data de nascimento não pode ser maior que a data atual. O formato da data deve ser DD-MM-YYYY;
-cpf: Uma string, não obrigatória, que armazena o CPF da pessoa (com a máscara do campo). Este campo pode ser vazio, mas se for informado os dígitos verificadores do CPF devem ser validados (https://dicasdeprogramacao.com.br/algoritmo-para-validar-cpf/);
-ativo: Um booleano, obrigatório, que indica se a pessoa está ativa na viagem. O valor true indica que a pessoa irá participar da viagem e o valor false indica que a pessoa não irá participar da viagem. Por default deve ser setado como True, indicando a participação da viagem;
-meta: Um valor numérico(double/float), obrigatório, que indica a meta em Reais que a pessoa busca alcançar. Este valor deve ser maior que 0.
+\n nome: Uma string, obrigatória, de até 255 caracteres que armazena o nome da pessoa;
+\n dataNascimento: Uma string, obrigatório, que armazena a data de nascimento da pessoa. A data de nascimento não pode ser maior que a data atual. O formato da data deve ser YYYY-MM-DD;
+\n cpf: Uma string, não obrigatória, que armazena o CPF da pessoa (com a máscara do campo). Este campo pode ser vazio, mas se for informado os dígitos verificadores do CPF devem ser validados (https://dicasdeprogramacao.com.br/algoritmo-para-validar-cpf/);
+\n ativo: Um booleano, obrigatório, que indica se a pessoa está ativa na viagem. O valor true indica que a pessoa irá participar da viagem e o valor false indica que a pessoa não irá participar da viagem. Por default deve ser setado como True, indicando a participação da viagem;
+\n meta: Um valor numérico, obrigatório, que indica a meta em Reais que a pessoa busca alcançar. Este valor deve ser maior que 0.
 
 ### Visualizar Pessoas
 Retorna uma lista com todas as pessoas (considerando uma paginação de registros) e suas informações. Os parâmetros página e tamanho são utilizados para controlar os registros que são retornados na requisição.
@@ -24,9 +24,9 @@ Permite editar as informações de uma pessoa. O registro deve respeitar as mesm
 
 ### Cadastrar Receita
 Permite realizar o cadastro de uma nova receita. Os campos disponíveis para cadastro são:
-pessoaId: Um select que deve apresentar o número inteiro do registro concatenado com o nome da pessoa, obrigatório, que contém o ID da pessoa (válida) que está armazenando a receita. Não deve ser possível informar o ID de uma pessoa não cadastrada;
-data: Um Date, obrigatório, que armazena a data em que a pessoa está guardando o dinheiro. A data da inclusão da receita não pode ser maior que a data atual. O formato da data deve ser DD-MM-YYYY; Por default, este campo já deve vir preenchido com a data atual(do dia), podendo ser alterado pela pessoa.
-valor: Um número numérico(double/float), obrigatório, que representa o montante de dinheiro que a pessoa está guardando. Este valor deve ser maior que 0.
+\n pessoaId: Um select que deve apresentar o número inteiro do registro concatenado com o nome da pessoa, obrigatório, que contém o ID da pessoa (válida) que está armazenando a receita. Não deve ser possível informar o ID de uma pessoa não cadastrada;
+\n data: Uma string, obrigatório, que armazena a data em que a pessoa está guardando o dinheiro. A data da inclusão da receita não pode ser maior que a data atual. O formato da data deve ser YYYY-MM-DD; Por default, este campo já deve vir preenchido com a data atual(do dia), podendo ser alterado pela pessoa.
+\n valor: Um número numérico, obrigatório, que representa o montante de dinheiro que a pessoa está guardando. Este valor deve ser maior que 0.
 
 ### Visualizar Receitas
 Retorna uma lista com todos os dados das receitas (valor da receita, data e pessoaId) cadastradas. Os parâmetros página e tamanho são utilizados para controlar os registros que são retornados na requisição.
@@ -111,3 +111,7 @@ COMO Pessoa PRECISO deletar Receita PARA atualizar dados da receita total.
 
 
 ## Criação da Automação de API
+
+Conforme código no repositório, realizar o clone para ambiente local;
+executar npm install para baixar as dependências;
+executar npm start para subir a api e realizar os testes.
