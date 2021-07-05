@@ -44,7 +44,7 @@ function PageablePessoas ( paginaAtual, tamanho, pessoas ) {
         paginaAtual = numeroDePaginas;
 
     const indiceInicial = paginaAtual * tamanho;
-    let indiceFinal = indiceInicial + tamanho;
+    let indiceFinal = indiceInicial + tamanho-1;
 
     if ( indiceFinal >= totalPessoas ) 
     indiceFinal = totalPessoas - 1;
@@ -182,8 +182,8 @@ app.put('/api/pessoas/:id', (request, response) => {
 
     const {nome, dataNascimento, cpf, ativo, meta} = request.body;
 
-    if (! (  parametroValido(nome) &&  parametroValido(dataNascimento) && 
-             parametroValido(meta) && parametroValido(meta) ) )
+    if (! (  parametroValido(nome)  && parametroValido(dataNascimento) && 
+             parametroValido(ativo) && parametroValido(meta) ) )
         return response.status(400).json({erro: 'Parâmetros inválidos'});
 
     if ( ! cpfValidator.isValid(cpf) ) 
@@ -199,7 +199,7 @@ app.put('/api/pessoas/:id', (request, response) => {
 
     const pessoaAtualizada = new Pessoa( id, nome, dataNascimento, cpf, ativo, meta);
     repositorioPessoas.splice(indicePessoa, 1, pessoaAtualizada)
-    return response.status(200).json(pessoaAtualizada);
+    return response.status(201).json(pessoaAtualizada);
 
 });
 
@@ -243,6 +243,32 @@ app.post('/api/receitas', (request, response) => {
     const receita = new Receita( proximoIdReceita(), pessoaId, data, valor);
     repositorioReceitas.push(receita)
     return response.status(201).json(receita);
+});
+
+app.put('/api/receitas/:id', (request, response) => {
+
+    if (! request.body )
+        return response.status(400).json({erro: 'Parâmetros inválidos'});
+
+    const {pessoaId, data, valor} = request.body;
+
+    if (! (  parametroValido(pessoaId) &&  parametroValido(data) && 
+             parametroValido(valor) ) )
+        return response.status(400).json({erro: 'Parâmetros inválidos'});
+
+    
+    let indiceReceita=-1;
+    for ( indiceReceita = 0; indiceReceita < repositorioReceitas.length; indiceReceita++ ) {
+        if ( repositorioReceitas[indiceReceita].id === id ) break;
+    }
+
+    if ( indiceReceita < 0 )
+        return response.status(404).json({ erro: 'Id não cadastrado'});
+
+    const receitaAtual = new Receita( id, pessoaId, data, valor);
+    repositorioReceitas.splice(receita, 1, receitaAtual)
+    return response.status(201).json(receita);
+    
 });
 
 
