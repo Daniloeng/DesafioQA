@@ -326,12 +326,21 @@ app.put('/api/receitas/:id', (request, response) => {
 });
 
 
-// app.delete('/api/receitas/:id', (request, response) => {
-//     const {id} = request.params;
+app.delete('/api/receitas/:id', (request, response) => {
+    const {id} = request.params;
 
-//     repositorioReceitas.delete(id, 1)
-//     return response.status(204).json(id);
-// });
+    let indiceReceita=-1;
+    for ( indiceReceita = 0; indiceReceita < repositorioReceitas.length; indiceReceita++ ) {
+        if ( repositorioReceitas[indiceReceita].id == id ) break;
+    }
+
+    if ( indiceReceita < 0 )
+        return response.status(404).json({ erro: 'receita não cadastrada'});
+
+    
+    repositorioReceitas.splice(indiceReceita, 1)
+    return response.status(204).json(id);    
+});
 
 
 
