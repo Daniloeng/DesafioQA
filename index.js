@@ -2,6 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 require('dotenv').config()
 const validator = require('cpf-cnpj-validator');
+const moment = require('moment');
 const cpfValidator = validator.cpf;
 
 
@@ -84,7 +85,7 @@ function PageableReceitas ( paginaAtual, tamanho, receitas ) {
         paginaAtual = numeroDePaginas;
 
     const indiceInicial = paginaAtual * tamanho;
-    let indiceFinal = indiceInicial + tamanho;
+    let indiceFinal = indiceInicial + tamanho-1;
 
     if ( indiceFinal >= totalReceitas ) 
     indiceFinal = totalReceitas - 1;
@@ -114,6 +115,12 @@ function TotalizadorPessoa ( id, nome, meta, valores) {
     }
 }
 
+function TotalizadorPessoas ( valorTotal) {
+    return {
+        valorFinal : valorTotal
+    }
+}
+
 
 
 function parametroValido (parametro) {
@@ -121,6 +128,13 @@ function parametroValido (parametro) {
     if ( parametro == null ) return false;
     if ( parametro == '' ) return false;
     return true;
+}
+
+function validaData(data) {  
+    const dateParam  = moment(data);
+    const atual = moment();     
+    if(dateParam > atual)    
+        return true;
 }
 
 
@@ -161,13 +175,24 @@ app.post('/api/pessoas', (request, response) => {
 
     const {nome, dataNascimento, cpf, ativo, meta} = request.body;
 
-    if (! (  parametroValido(nome) && parametroValido(dataNascimento) && 
-             parametroValido(meta) && parametroValido(meta) ) )
+    if (! (  parametroValido(nome) && parametroValido(dataNascimento)
+             && parametroValido(meta) ) )
         return response.status(400).json({erro: 'Parâmetros inválidos'});
+    
+    if(parametroValido(dataNascimento)) {    
+        if(validaData(dataNascimento)) {              
+            return response.status(400).json({erro: 'Data de nascimento deve ser menor ou igual a atual'});
+        }
+    }
 
-    if ( ! cpfValidator.isValid(cpf))    
+    if(ativo == undefined) {
+        return response.status(400).json({erro: 'Necessário informar o ativo'});
+    }
+    
+    if(parametroValido(cpf)) {
+        if ( ! cpfValidator.isValid(cpf))    
         return response.status(400).json({erro: 'CPF inválido'});
-
+    }
     const pessoa = new Pessoa( proximoIdPessoa(), nome, dataNascimento, cpf, ativo, meta);
     repositorioPessoas.push(pessoa)
     return response.status(201).json(pessoa);
@@ -182,16 +207,26 @@ app.put('/api/pessoas/:id', (request, response) => {
 
     const {nome, dataNascimento, cpf, ativo, meta} = request.body;
 
-    if (! (  parametroValido(nome)  && parametroValido(dataNascimento) && 
-             parametroValido(ativo) && parametroValido(meta) ) )
+    if (! (  parametroValido(nome)  && parametroValido(dataNascimento)
+             && parametroValido(meta) ) )
         return response.status(400).json({erro: 'Parâmetros inválidos'});
 
+    if(ativo == undefined) {
+        return response.status(400).json({erro: 'Necessário informar o ativo'});
+    }
+    
     if ( ! cpfValidator.isValid(cpf) ) 
         return response.status(400).json({erro: 'CPF inválido'});
 
+    if(parametroValido(dataNascimento)) {    
+        if(validaData(dataNascimento)) {              
+            return response.status(400).json({erro: 'Data de nascimento deve ser menor ou igual a atual'});
+        }
+    
+    }
     let indicePessoa=-1;
     for ( indicePessoa = 0; indicePessoa < repositorioPessoas.length; indicePessoa++ ) {
-        if ( repositorioPessoas[indicePessoa].id === id ) break;
+        if ( repositorioPessoas[indicePessoa].id == id ) break;
     }
 
     if ( indicePessoa < 0 )
@@ -239,13 +274,24 @@ app.post('/api/receitas', (request, response) => {
     if (! (  parametroValido(pessoaId) &&  parametroValido(data) && 
              parametroValido(valor) ) )
         return response.status(400).json({erro: 'Parâmetros inválidos'});
+    
+    if(parametroValido(data)) {    
+        if(validaData(data)) {              
+            return response.status(400).json({erro: 'Data deve ser menor ou igual a atual'});
+        }
+    }
+
+    if(valor < 0)
+        return response.status(400).json({erro: 'Informar valor maior que 0'})
 
     const receita = new Receita( proximoIdReceita(), pessoaId, data, valor);
     repositorioReceitas.push(receita)
     return response.status(201).json(receita);
 });
 
+
 app.put('/api/receitas/:id', (request, response) => {
+    const {id} = request.params;
 
     if (! request.body )
         return response.status(400).json({erro: 'Parâmetros inválidos'});
@@ -255,21 +301,37 @@ app.put('/api/receitas/:id', (request, response) => {
     if (! (  parametroValido(pessoaId) &&  parametroValido(data) && 
              parametroValido(valor) ) )
         return response.status(400).json({erro: 'Parâmetros inválidos'});
-
+    
+    if(parametroValido(data)) {    
+        if(validaData(data)) {              
+            return response.status(400).json({erro: 'Data deve ser menor ou igual a atual'});
+        }
+    }
+    
+    if(valor < 0)
+        return response.status(400).json({erro: 'Informar valor maior que 0'})
     
     let indiceReceita=-1;
     for ( indiceReceita = 0; indiceReceita < repositorioReceitas.length; indiceReceita++ ) {
-        if ( repositorioReceitas[indiceReceita].id === id ) break;
+        if ( repositorioReceitas[indiceReceita].id == id ) break;
     }
 
     if ( indiceReceita < 0 )
         return response.status(404).json({ erro: 'Id não cadastrado'});
 
     const receitaAtual = new Receita( id, pessoaId, data, valor);
-    repositorioReceitas.splice(receita, 1, receitaAtual)
-    return response.status(201).json(receita);
+    repositorioReceitas.splice(indiceReceita, 1, receitaAtual)
+    return response.status(201).json(receitaAtual);
     
 });
+
+
+// app.delete('/api/receitas/:id', (request, response) => {
+//     const {id} = request.params;
+
+//     repositorioReceitas.delete(id, 1)
+//     return response.status(204).json(id);
+// });
 
 
 
@@ -285,25 +347,27 @@ app.get('/api/totalizadores', (request, response) => {
 
     const totalizadorPorPessoa = [];
     let totalizadorDaPessoa;
-    let valores;
+    let valores;    
 
     repositorioPessoas.forEach( (pessoa) => {
 
         if(pessoa.ativo) {
-            valores = 0;
+            let valores = 0;
             repositorioReceitas.forEach( (receita) => {
                 if ( receita.pessoaId == pessoa.id )
-                    valores += receita.valor;
+                    valores += receita.valor;                    
             });
             totalizadorDaPessoa = new TotalizadorPessoa( pessoa.id, pessoa.nome, pessoa.meta, valores);
             totalizadorPorPessoa.push(totalizadorDaPessoa);
         }
-
+       
     });
-
+    
     return response.status(200).json(totalizadorPorPessoa);
     
 })
+
+
 
 
 
