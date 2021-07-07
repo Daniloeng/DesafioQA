@@ -55,11 +55,6 @@ pm.test("Status code is 200", function () {
     pm.response.to.have.status(200);
 });
 
-pm.test("Verificar atributo de totalização", function() {
-    const responseJson = pm.response.json();   
-    pm.expect(responseJson.pessoas.length).to.equal(responseJson.numeroRegistros)
-});
-
 pm.test("testa se todas pessoas possuem campos obrigatórios", function(){
     _.forEach(pm.response.json(), function(pessoa){
         pm.expect(pessoa.nome).to.not.be.null &&
@@ -67,6 +62,26 @@ pm.test("testa se todas pessoas possuem campos obrigatórios", function(){
         pm.expect(pessoa.meta).to.not.be.null ;
     })
 });
+
+pm.test("Verificar atributo de totalização de pessoas", function () {
+    const responseJson = pm.response.json()
+    pm.expect(pm.response.json().length).to.equal(responseJson.quantidade)
+});
+
+
+pm.test("deveria retornar reason OK", function(){
+    pm.expect(pm.response.reason()).to.equal("OK");
+    //ou
+    pm.response.to.be.ok;
+});
+
+
+pm.test("deveria ter Content-Type ho header", function () {
+    pm.expect(pm.response.headers.get("Content-Type")).to.not.be.undefined;
+    //ou
+    pm.response.to.have.header("Content-Type");
+});
+
 ```
 
 ### POST pessoas
@@ -144,6 +159,14 @@ pm.test("testa se a receita possui campos obrigatórios", function(){
         pm.expect(receita.data).to.not.be.null && 
         pm.expect(receita.valor).to.not.be.null ;
     })
+});
+```
+
+### DELETE receita
+
+```
+pm.test("Successful DELETE request", function () {
+    pm.expect(pm.response.code).to.be.oneOf([200, 204]);
 });
 ```
 

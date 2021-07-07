@@ -115,9 +115,10 @@ function TotalizadorPessoa ( id, nome, meta, valores) {
     }
 }
 
-function TotalizadorPessoas ( valorTotal) {
+function TotalizadorListPessoas ( valorTotal, valoresPorPessoa) {
     return {
-        valorFinal : valorTotal
+        valorpessoas: valoresPorPessoa,
+        valorFinal : valorTotal 
     }
 }
 
@@ -281,6 +282,19 @@ app.post('/api/receitas', (request, response) => {
         }
     }
 
+    if(repositorioPessoas.length == 0) {
+        return response.status(400).json({erro: 'Nenhuma pessoa cadastrada!'});
+    }
+   
+    let pessoaEncontrada = -1;    
+    for ( indicePessoa = 0; indicePessoa < repositorioPessoas.length; indicePessoa++) {        
+        if ( repositorioPessoas[indicePessoa].id == pessoaId ) 
+            pessoaEncontrada = indicePessoa;
+    }
+
+    if ( pessoaEncontrada < 0 )
+        return response.status(404).json({ erro: 'Pessoa não cadastrada'});
+
     if(valor < 0)
         return response.status(400).json({erro: 'Informar valor maior que 0'})
 
@@ -336,7 +350,6 @@ app.delete('/api/receitas/:id', (request, response) => {
 
     if ( indiceReceita < 0 )
         return response.status(404).json({ erro: 'receita não cadastrada'});
-
     
     repositorioReceitas.splice(indiceReceita, 1)
     return response.status(204).json(id);    
@@ -356,7 +369,8 @@ app.get('/api/totalizadores', (request, response) => {
 
     const totalizadorPorPessoa = [];
     let totalizadorDaPessoa;
-    let valores;    
+    let valores;  
+    let valoresFinal=0;  
 
     repositorioPessoas.forEach( (pessoa) => {
 
@@ -364,16 +378,18 @@ app.get('/api/totalizadores', (request, response) => {
             let valores = 0;
             repositorioReceitas.forEach( (receita) => {
                 if ( receita.pessoaId == pessoa.id )
-                    valores += receita.valor;                    
+                valores += receita.valor; 
             });
+            valoresFinal += valores;                   
             totalizadorDaPessoa = new TotalizadorPessoa( pessoa.id, pessoa.nome, pessoa.meta, valores);
             totalizadorPorPessoa.push(totalizadorDaPessoa);
         }
        
     });
+
+    const totalizadorFinal = new TotalizadorListPessoas(valoresFinal, totalizadorPorPessoa);    
     
-    return response.status(200).json(totalizadorPorPessoa);
-    
+    return response.status(200).json(totalizadorFinal);    
 })
 
 
